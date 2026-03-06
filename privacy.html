@@ -36,6 +36,11 @@
             color: #fff;
             margin: 28px 0 12px;
         }
+        h3 {
+            font-size: 1.05rem;
+            color: #ccc;
+            margin: 20px 0 8px;
+        }
         p {
             color: #aaa;
             margin-bottom: 12px;
@@ -56,6 +61,15 @@
             margin: 16px 0;
         }
         .highlight p { color: #8fd9a8; margin: 0; }
+        .info-box {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .info-box p { color: #999; margin-bottom: 8px; }
+        .info-box p:last-child { margin-bottom: 0; }
         .footer {
             text-align: center;
             padding: 40px 0 20px;
@@ -72,44 +86,87 @@
         </nav>
 
         <h1>Privacy Policy</h1>
-        <p class="date">Last updated: March 2, 2026</p>
+        <p class="date">Last updated: March 6, 2026</p>
 
         <div class="highlight">
-            <p><strong>BlinkAlarm does not collect, store, or transmit any personal data or images. All processing happens entirely on your device.</strong></p>
+            <p><strong>BlinkAlarm does not collect, store, or transmit any personal data, face images, or biometric identifiers. All camera and face data processing happens entirely on your device in real time.</strong></p>
         </div>
 
-        <h2>Camera Usage</h2>
-        <p>BlinkAlarm uses the front-facing camera solely for real-time blink detection through Apple's Vision framework. The camera feed is processed frame-by-frame on your device and is never recorded, saved, or transmitted to any server.</p>
+        <!-- Section 1: Face Data -->
+        <h2 id="face-data">Face Data Collection and Use</h2>
 
-        <h2>Data Stored on Your Device</h2>
+        <h3>What Face Data Is Processed</h3>
+        <p>BlinkAlarm uses the device's front-facing camera and Apple's on-device <strong>Vision framework</strong> (<code>VNDetectFaceLandmarksRequest</code>) to process the following face-related data in real time:</p>
+        <ul>
+            <li><strong>Eye landmark coordinates</strong> — The positions of points on the left and right eye regions, relative to the detected face bounding box. These coordinates are used to calculate the Eye Aspect Ratio (EAR), which determines whether the user's eyes are open or closed.</li>
+            <li><strong>Head pose angles</strong> (yaw, pitch, roll) — Used solely to filter out video frames where the user's face is at an extreme angle, which would produce inaccurate blink detection results.</li>
+            <li><strong>Face detection status</strong> — A simple boolean indicating whether a face is currently visible in the camera frame. Used to automatically pause blink tracking when the user steps away.</li>
+        </ul>
+
+        <h3>How Face Data Is Used</h3>
+        <p>All face data is used exclusively for <strong>real-time blink detection</strong> to help protect the user's eye health:</p>
+        <ul>
+            <li><strong>Blink detection:</strong> Eye landmark coordinates are converted into an Eye Aspect Ratio (EAR) — a numerical height-to-width ratio of the eye region. When EAR drops below a calibrated threshold and then recovers, a blink is counted. This is the core function of the app.</li>
+            <li><strong>Calibration:</strong> During the first approximately 3 seconds of each monitoring session, the app collects EAR samples to establish the user's personal baseline open-eye EAR value. This calibration data consists of approximately 45 numerical values (not images) held temporarily in device memory.</li>
+            <li><strong>Head pose filtering:</strong> Head yaw and roll angles are compared against thresholds to discard frames that would produce unreliable EAR readings.</li>
+            <li><strong>Face presence detection:</strong> When no face is detected for 3 seconds, blink tracking automatically pauses to avoid recording inaccurate data.</li>
+        </ul>
+        <p><strong>BlinkAlarm does not perform facial recognition, facial identification, or any form of biometric identification.</strong> The app cannot identify who is using it and does not attempt to do so. The face data is used only to detect whether eyes are open or closed.</p>
+
+        <h3>Face Data Retention</h3>
+        <p><strong>Raw face data is not retained.</strong> Camera frames and face landmark data exist only in device memory for the duration of a single processing cycle (approximately 67 milliseconds at 15 frames per second) and are immediately discarded after the EAR value is calculated.</p>
+        <p>Calibration samples (approximately 45 numerical EAR values) are held in device memory only during the active monitoring session and are cleared when monitoring stops or the app is closed. These values are never written to disk.</p>
+        <p>The only data that is persistently stored is <strong>aggregate session statistics</strong> — blink count, session duration, and average blink rate per minute. These statistics contain no face data, no images, and no biometric information.</p>
+
+        <h3>Face Data Sharing</h3>
+        <p><strong>Face data is never shared with any third party.</strong> All face data processing occurs entirely on-device using Apple's Vision framework. No camera frames, face landmarks, EAR values, head pose angles, or any other face-related data are ever transmitted over the network, uploaded to any server, or made accessible to any external service.</p>
+
+        <!-- Section 2: Camera Usage -->
+        <h2 id="camera-usage">Camera Usage</h2>
+        <p>BlinkAlarm uses the front-facing camera solely for real-time blink detection through Apple's Vision framework. The camera feed is processed frame-by-frame on your device and is never recorded, saved, or transmitted to any server. The app uses a low frame rate (15 fps) to minimize battery and CPU usage.</p>
+
+        <!-- Section 3: Data Stored on Device -->
+        <h2 id="data-stored">Data Stored on Your Device</h2>
         <p>The following data is stored locally on your device using Apple's SwiftData framework:</p>
         <ul>
-            <li>Blink session records (start time, duration, blink count, average blink rate)</li>
-            <li>User preferences (selected theme, alert settings, language preference)</li>
+            <li><strong>Blink session records:</strong> start time, end time, duration, blink count, and average blink rate per minute</li>
+            <li><strong>User preferences:</strong> selected theme, alert thresholds, sound/haptic settings, language preference</li>
         </ul>
-        <p>This data never leaves your device and is only accessible to the BlinkAlarm app. You can delete all session data at any time by deleting the app.</p>
+        <p>This data never leaves your device and is only accessible to the BlinkAlarm app within its sandboxed container. You can delete all stored data at any time by deleting the app.</p>
 
-        <h2>No Data Collection</h2>
+        <div class="info-box">
+            <p><strong>Important:</strong> No face images, face geometry, eye images, facial feature vectors, or biometric identifiers are ever included in the stored session data. Only numerical statistics (blink count, duration, rate) are saved.</p>
+        </div>
+
+        <!-- Section 4: No Data Collection -->
+        <h2 id="no-collection">No Data Collection</h2>
         <p>BlinkAlarm does not:</p>
         <ul>
-            <li>Collect any personal information</li>
-            <li>Record or store any images or video</li>
+            <li>Collect, store, or transmit any face images or video recordings</li>
+            <li>Perform facial recognition or biometric identification</li>
+            <li>Store face landmarks, eye coordinates, or head pose data to disk</li>
+            <li>Collect any personal information or user identifiers</li>
             <li>Use any analytics, tracking, or advertising SDKs</li>
             <li>Transmit any data to external servers</li>
             <li>Use cookies or any tracking technologies</li>
+            <li>Require an internet connection to function</li>
         </ul>
 
-        <h2>No Third-Party Services</h2>
-        <p>BlinkAlarm does not integrate with any third-party services. The app operates completely offline and does not require an internet connection to function.</p>
+        <!-- Section 5: No Third-Party Services -->
+        <h2 id="no-third-party">No Third-Party Services</h2>
+        <p>BlinkAlarm does not integrate with any third-party services, SDKs, or frameworks beyond Apple's own system frameworks (Vision, AVFoundation, SwiftData). The app contains no network communication code and operates completely offline. No data of any kind leaves the user's device.</p>
 
-        <h2>Children's Privacy</h2>
-        <p>BlinkAlarm does not knowingly collect any information from children. The app does not collect information from anyone.</p>
+        <!-- Section 6: Children's Privacy -->
+        <h2 id="children">Children's Privacy</h2>
+        <p>BlinkAlarm does not knowingly collect any information from children or anyone else. Since the app does not collect, store, or transmit any personal data, there is no age-specific data handling.</p>
 
-        <h2>Changes to This Policy</h2>
+        <!-- Section 7: Changes -->
+        <h2 id="changes">Changes to This Policy</h2>
         <p>If we update this privacy policy, the changes will be posted on this page with an updated revision date.</p>
 
-        <h2>Contact</h2>
-        <p>If you have any questions about this privacy policy, please contact us at:</p>
+        <!-- Section 8: Contact -->
+        <h2 id="contact">Contact</h2>
+        <p>If you have any questions about this privacy policy or how BlinkAlarm handles your data, please contact us at:</p>
         <p>Email: <a href="mailto:lucas196700@gmail.com">lucas196700@gmail.com</a></p>
 
         <div class="footer">
